@@ -1,0 +1,12 @@
+services:
+  db:
+    build: .
+    container_name: social-db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - .docker/db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=social

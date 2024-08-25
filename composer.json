@@ -1,0 +1,16 @@
+{
+    "name": "francishamzagic/backend",
+    "description": "backend for social network",
+    "authors": [
+        {
+            "name": "Francis Hamzagic",
+            "email": "francishamzagic@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
