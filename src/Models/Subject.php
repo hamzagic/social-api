@@ -8,11 +8,10 @@ class Subject
   private $name;
   private $description;
 
-  public function __construct($id, $name, $description = null)
+  public function __construct()
   {
-    $this->id = $id;
-    $this->name = $name;
-    $this->description = $description;
+    // $this->name = $name;
+    // $this->description = $description;
   }
 
   public function getId()
@@ -28,11 +27,6 @@ class Subject
   public function getDescription()
   {
     return $this->description;
-  }
-
-  public function setId($id)
-  {
-    $this->id = $id;
   }
 
   public function setName($name)
