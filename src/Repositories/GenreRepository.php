@@ -3,11 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Genre;
-use App\Interfaces\GenreRepositoryInterface;
-use PDO;
+use App\Repositories\SubjectRepository;
+use App\Interfaces\BasicRepositoryInterface;
 use App\Database\Connection;
+use PDO;
+use PDOException;
 
-class GenreRepository implements GenreRepositoryInterface
+class GenreRepository implements BasicRepositoryInterface
 {
   private PDO $pdo;
   private $connection;
@@ -17,41 +19,58 @@ class GenreRepository implements GenreRepositoryInterface
     $this->pdo = $this->connection->connect();
   }
 
-  public function create(Genre $genre): Genre
+  public function create($data)
   {
-    $statement = $this->pdo->prepare('INSERT INTO subject (name) VALUES (:name)');
-    $statement->execute([
-      'name' => $genre->getName()
-    ]);
-    $genre->setId($this->pdo->lastInsertId());
-    return $genre;
+    try {
+      $exists = $this->findByName(strtolower($data->name));
+      if($exists) {
+        http_response_code(400);
+        echo '{"message": "Genre already exists"}';
+        return;
+      }
+    } catch(PDOException $e) {
+      echo $e->getMessage();
+    }
+    $subject = new SubjectRepository($this->connection);
+    $result =$subject->findById($data);
+    if(!empty($result)) {
+      try {
+        $data->name = strtolower($data->name);
+        $statement = $this->pdo->prepare('INSERT INTO genre (name, description, subject_id) VALUES (:name, :description, :subject_id)');
+        $statement->bindParam(':name', $data->name, PDO::PARAM_STR);
+        $statement->bindParam(':description', $data->description, PDO::PARAM_STR);
+        $statement->bindParam(':subject_id', $result['id'], PDO::PARAM_INT);
+        $statement->execute();
+        $subject = $statement->fetch(PDO::FETCH_ASSOC);
+        return $subject;
+      } catch(PDOException $e) {
+        echo $e->getMessage();
+      }
+    } else {
+      http_response_code(400);
+      echo '{"message": "Invalid genre"}';
+      return;
+    }
   }
 
-  public function update(Genre $genre): Genre
+  public function update($data)
   {
     $statement = $this->pdo->prepare('UPDATE subject SET name = :name WHERE id = :id');
-    $statement->execute([
-      'name' => $genre->getName(),
-      'id' => $genre->getId()
-    ]);
-    return $$genre;
+    $statement->execute();
+
   }
 
-  public function delete(Genre $genre): Genre
+  public function delete($data)
   {
     $statement = $this->pdo->prepare('DELETE FROM subject WHERE id = :id');
-    $statement->execute([
-      'id' => $genre->getId()
-    ]);
-    return $genre;
+    $statement->execute();
+   
   }
 
   public function findById(int $id): Genre
   {
     $statement = $this->pdo->prepare('SELECT * FROM subject WHERE id = :id');
-    $statement->execute([
-      'id' => $id
-    ]);
+    $statement->execute();
     $genre = $statement->fetchObject(Genre::class);
     return $genre;
   }
@@ -63,13 +82,13 @@ class GenreRepository implements GenreRepositoryInterface
     return $genres;
   }
 
-  public function findByName(string $name): Genre
+  public function findByName(string $name)
   {
-    $statement = $this->pdo->prepare('SELECT * FROM subject WHERE name = :name');
-    $statement->execute([
-      'name' => $name
-    ]);
-    $genre = $statement->fetchObject(Genre::class);
+    $name = strtolower($name);
+    $statement = $this->pdo->prepare('SELECT * FROM genre WHERE name = :name');
+    $statement->bindParam(':name', $name, PDO::PARAM_STR);
+    $statement->execute();
+    $genre = $statement->fetch(PDO::FETCH_ASSOC);
     return $genre;
   }
 }

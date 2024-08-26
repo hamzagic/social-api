@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Subject;
-use App\Interfaces\SubjectRepositoryInterface;
 use App\Interfaces\BasicRepositoryInterface;
 use PDO;
 use App\Database\Connection;

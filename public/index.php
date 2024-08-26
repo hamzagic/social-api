@@ -3,10 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use App\Database\Connection;
 use App\Controllers\SubjectController;
-// use App\Core\Router;
-// require 'Database/Connection.php';
-// require 'Controllers/SubjectController.php';
-// require 'Core/Router.php';
+use App\Controllers\GenreController;
 
 $connection = new Connection();
 $connection->connect();
@@ -18,6 +15,7 @@ $routes = [
   '/subject/create' => [SubjectController::class, 'create'],
   '/subject/find-one' => [SubjectController::class, 'findById'],
   '/subject/find-name' => [SubjectController::class, 'findByName'],
+  '/genre/create' => [GenreController::class, 'create'],
 ];
 
 if(isApiRoute($path)) {
