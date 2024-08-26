@@ -16,8 +16,8 @@ class SubjectController
   public function create($data)
   {
     $content = json_decode($data);
-    foreach($content as $key => $value) {
-      if(empty($value)) {
+    foreach ($content as $key => $value) {
+      if (empty($value)) {
         http_response_code(400);
         $resp = [
           "message" => "Invalid data"
@@ -26,13 +26,32 @@ class SubjectController
       }
     }
     $subject = $this->subjectRepository->create($content);
-    http_response_code(201);
-    echo json_encode($subject);
+    if (!$subject) {
+      return;
+    } else {
+      http_response_code(201);
+      echo json_encode($subject);
+    }
   }
 
   public function findById($data): void
   {
     $subject = $this->subjectRepository->findById($data);
     echo json_encode($subject);
+  }
+
+  public function findByName($data)
+  {
+    $data = json_decode($data);
+    if (!empty($data) && is_string($data->name)) {
+      $subject = $this->subjectRepository->findByName($data->name);
+      echo json_encode($subject);
+    } else {
+      http_response_code(400);
+      $resp = [
+        "message" => "Invalid data"
+      ];
+      echo json_encode($resp);
+    }
   }
 }

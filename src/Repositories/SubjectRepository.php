@@ -22,14 +22,22 @@ class SubjectRepository implements BasicRepositoryInterface
   public function create($data)
   {
     try {
+      $exists = $this->findByName(strtolower($data->name));
+      if($exists) {
+        http_response_code(400);
+        echo '{"message": "Subject already exists"}';
+        return;
+      }
+    } catch(PDOException $e) {
+      echo $e->getMessage();
+    }
+    try {
+      $data->name = strtolower($data->name);
       $subject = new Subject();
       $statement = $this->pdo->prepare('INSERT INTO subject (name, description) VALUES (:name, :description)');
       $statement->bindParam(':name', $data->name, PDO::PARAM_STR);
       $statement->bindParam(':description', $data->description, PDO::PARAM_STR);
       $statement->execute();
-      // $subject = $this->pdo->lastInsertId();
-      // echo $subject;
-      // $this->findById($subject);
       return $subject;
 
     } catch(PDOException $e) {
@@ -57,7 +65,9 @@ class SubjectRepository implements BasicRepositoryInterface
   public function findById($data)
   {
     try {
-      $data = json_decode($data);
+      if(is_string($data)) {
+        $data = json_decode($data);
+      }
       $statement = $this->pdo->prepare('SELECT * FROM subject WHERE id = :id');
       $statement->bindParam(':id', $data->id, PDO::PARAM_INT);
       $statement->execute();
@@ -76,12 +86,13 @@ class SubjectRepository implements BasicRepositoryInterface
     return $subjects;
   }
 
-  public function findByName(string $name): Subject
+  public function findByName(string $name)
   {
+    $name = strtolower($name);
     $statement = $this->pdo->prepare('SELECT * FROM subject WHERE name = :name');
-    $statement->bindParam(':name', $data['name'], PDO::PARAM_STR);
+    $statement->bindParam(':name', $name, PDO::PARAM_STR);
     $statement->execute();
-    $subject = $statement->fetchObject(Subject::class);
+    $subject = $statement->fetch(PDO::FETCH_ASSOC);
     return $subject;
   }
 }

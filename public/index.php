@@ -17,6 +17,7 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $routes = [
   '/subject/create' => [SubjectController::class, 'create'],
   '/subject/find-one' => [SubjectController::class, 'findById'],
+  '/subject/find-name' => [SubjectController::class, 'findByName'],
 ];
 
 if(isApiRoute($path)) {
@@ -51,6 +52,9 @@ function route($routes, $route, $connection)
     } else {
       echo "Invalid class";
     }
+  } else {
+    http_response_code(404);
+    echo "Route not found";
   }
 }
 
