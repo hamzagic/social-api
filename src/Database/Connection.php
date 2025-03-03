@@ -10,6 +10,7 @@ class Connection
   /**
    * @var PDO
    */
+  // test purposes only - will not work since it is localhost stuff
   private $pdo; 
   private $host = 'localhost';
   private $username = 'postgres';
